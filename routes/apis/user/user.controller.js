@@ -26,9 +26,9 @@ exports.SignUp = async (req, res) => {
             major,
             age,
             gender,
-            content
+            contact
         } = req.body
-        if (!id || !password || !name || !studentId || !grade || !major || !age || !gender || !content) {
+        if (!id || !password || !name || !studentId || !grade || !major || !age || !gender || !contact) {
             return res.status(400).send('파라미터가 잘못되었습니다.')
         }
 
@@ -37,7 +37,7 @@ exports.SignUp = async (req, res) => {
             return res.status(400).send('이미 존재하는 아이디 입니다.')
         }
 
-        const result = await UserDB.Create({ id, password, name, studentId, grade, major, age, gender, content })
+        const result = await UserDB.Create({ id, password, name, studentId, grade, major, age, gender, contact })
         const token = await _issueToken(result.insertedId)
         res.send({ token })
     } catch (error) {
@@ -58,9 +58,8 @@ exports.SignIn = async (req, res) => {
 
 exports.GetUserData = async (req, res) => {
     try {
-        const { id: userId } = req.params
-        console.log(req.user)
-        res.send('Success!')
+        const user = await UserDB.GetItem({ _id: req.user._id })
+        res.send({ data: user })
     } catch (error) {
         res.status(500).send('Internal Server Error')
     }

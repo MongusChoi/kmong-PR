@@ -5,7 +5,7 @@ const crypto = require('crypto')
 
 module.exports = {
     Create: (param = {}) => {
-        const { id, password, grade, name, studentId, major, age, gender, content } = param
+        const { id, password, grade, name, studentId, major, age, gender, contact } = param
 
         const encryptedPwd = crypto.createHmac('sha1', SECRET).update(password).digest('base64');
         return usersColl.insertOne({
@@ -17,7 +17,7 @@ module.exports = {
             major,
             age,
             gender,
-            content
+            contact
         })
     }
 }

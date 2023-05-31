@@ -7,6 +7,6 @@ router.post('/sign-in', passport.authenticate('local'), controller.SignIn)
 
 router.use('*', passport.authenticate('jwt'))
 
-router.get('/:id', controller.GetUserData)
+router.get('/me', controller.GetUserData)
 
 module.exports = router

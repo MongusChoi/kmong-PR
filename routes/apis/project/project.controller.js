@@ -117,7 +117,7 @@ exports.CreateApplication = async (req, res) => {
             name: userData.name,
             grade: userData.grade,
             studentId: userData.studentId,
-            content: userData.content,
+            contact: userData.contact,
             title, 
             description
         }
@@ -150,7 +150,7 @@ exports.ApplyApplication = async (req, res) => {
 
         let isExistApplication = false, memberData = {}
         projectData.application.forEach(item => {
-            const { userId: applicationMemberId, name, grade, studentId, content, description } = item
+            const { userId: applicationMemberId, name, grade, studentId, contact, description } = item
             if (applicationId === applicationMemberId) {
                 isExistApplication = true
                 memberData = {
@@ -158,7 +158,7 @@ exports.ApplyApplication = async (req, res) => {
                     name,
                     grade,
                     studentId,
-                    content,
+                    contact,
                     description
                 }
             }
