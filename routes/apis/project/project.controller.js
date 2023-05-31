@@ -139,7 +139,7 @@ exports.ApplyApplication = async (req, res) => {
         const { id: projectId } = req.params
         const { applicationId } = req.body
 
-        if (!projectId || projectId.length !== 24) {
+        if (!projectId && projectId.length !== 24 && !applicationId && applicationId.length !== 24) {
             return res.status(400).send('파라미터가 잘못되었습니다.')
         }
 
@@ -181,6 +181,45 @@ exports.ApplyApplication = async (req, res) => {
         const updateUserResult = await UserDB.UpdateProjectId({ _id: applicationId, projectId: projectData._id })
         if (updateUserResult.matchedCount === 0) {
             return res.status(404).send('유저를 찾을 수 없습니다.')
+        }
+
+        res.send('Success!')
+    } catch (error) {
+        console.log(error)
+        res.status(500).send('Internal Server Error')
+    }
+}
+
+exports.DeleteApplication = async (req, res) => {
+    try {
+        const { _id: userId } = req.user
+        const { id: projectId } = req.params
+        const { applicationId } = req.body
+
+        if (!projectId && projectId.length !== 24 && !applicationId && applicationId.length !== 24) {
+            return res.status(400).send('파라미터가 잘못되었습니다.')
+        }
+
+        const projectData = await ProjectDB.GetItem({ id: projectId, owner: userId })
+        if (!projectData) {
+            return res.status(400).send('프로젝트 주최자가 아닙니다.')
+        }
+
+        let isExistApplication = false
+        projectData.application.forEach(item => {
+            const { userId: applicationMemberId } = item
+            if (applicationId === applicationMemberId) {
+                isExistApplication = true
+            }
+        })
+
+        if (!isExistApplication) {
+            return res.status(404).send('지원서를 찾을 수 없습니다.')
+        }
+
+        const removeApplicationResult = await ProjectDB.UpdateApplicationItem({ id: projectId, applicationId })
+        if (removeApplicationResult.matchedCount === 0) {
+            return res.status(404).send('지원서를 찾을 수 없습니다.')
         }
 
         res.send('Success!')
