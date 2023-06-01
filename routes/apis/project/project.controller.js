@@ -18,7 +18,9 @@ exports.GetItem = async (req, res) => {
             return res.status(400).send('파라미터가 잘못되었습니다.')
         }
 
-        const result = await ProjectDB.GetItem({ id })
+        const projectData = await ProjectDB.GetItem({ id })
+        const ownerData = await UserDB.GetItem({ _id: projectData.owner })
+        const result = { ...projectData, owner: ownerData.name }
         res.send({ data: result })
     } catch (error) {
         console.log(error)
@@ -118,6 +120,7 @@ exports.CreateApplication = async (req, res) => {
             grade: userData.grade,
             studentId: userData.studentId,
             contact: userData.contact,
+            major: userData.major,
             title, 
             description
         }
@@ -150,7 +153,7 @@ exports.ApplyApplication = async (req, res) => {
 
         let isExistApplication = false, memberData = {}
         projectData.application.forEach(item => {
-            const { userId: applicationMemberId, name, grade, studentId, contact, description } = item
+            const { userId: applicationMemberId, name, grade, studentId, contact, description, major } = item
             if (applicationId === applicationMemberId) {
                 isExistApplication = true
                 memberData = {
@@ -159,7 +162,8 @@ exports.ApplyApplication = async (req, res) => {
                     grade,
                     studentId,
                     contact,
-                    description
+                    description,
+                    major
                 }
             }
         })
