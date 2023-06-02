@@ -19,8 +19,12 @@ exports.GetItem = async (req, res) => {
         }
 
         const projectData = await ProjectDB.GetItem({ id })
+        if (!projectData) {
+            return res.status(404).send('데이터를 찾을 수 없습니다.')
+        }
+        
         const ownerData = await UserDB.GetItem({ _id: projectData.owner })
-        const result = { ...projectData, owner: ownerData.name }
+        const result = { ...projectData, owner: ownerData.name, ownerId: projectData.owner }
         res.send({ data: result })
     } catch (error) {
         console.log(error)
@@ -172,6 +176,12 @@ exports.ApplyApplication = async (req, res) => {
             return res.status(404).send('지원서를 찾을 수 없습니다.')
         }
 
+        const userData = await UserDB.GetItem({ _id: memberData.userId })
+        if (userData.projectId) {
+            await ProjectDB.UpdateApplicationItem({ id: projectId, applicationId })
+            return res.status(400).send('이미 다른 프로젝트에 참여한 유저입니다.')
+        }
+
         const removeApplicationResult = await ProjectDB.UpdateApplicationItem({ id: projectId, applicationId })
         if (removeApplicationResult.matchedCount === 0) {
             return res.status(404).send('지원서를 찾을 수 없습니다.')
@@ -185,6 +195,36 @@ exports.ApplyApplication = async (req, res) => {
         const updateUserResult = await UserDB.UpdateProjectId({ _id: applicationId, projectId: projectData._id })
         if (updateUserResult.matchedCount === 0) {
             return res.status(404).send('유저를 찾을 수 없습니다.')
+        }
+
+        res.send('Success!')
+    } catch (error) {
+        console.log(error)
+        res.status(500).send('Internal Server Error')
+    }
+}
+
+exports.DeleteProject = async (req, res) => {
+    try {
+        const { _id: userId } = req.user
+        const { id: projectId } = req.params
+
+        if (!projectId || projectId.length !== 24) {
+            return res.status(400).send('파라미터가 잘못되었습니다.')
+        }
+        const projectData = await ProjectDB.GetItem({ _id: projectId, owner: userId  })
+        if (!projectData) {
+            return res.status(404).send('프로젝트를 찾을 수 없습니다.')
+        }
+
+        if (projectData.members.length > 0) {
+            const memberIdArr = projectData.members.map(item => item.userId)
+            await Promise.all(memberIdArr.map(item => UserDB.UpdateProjectId({ _id: item, projectId: '' })))
+        }
+
+        const result = await ProjectDB.DeleteItem({ _id: projectId, owner: userId })
+        if (result.deletedCount === 0) {
+            return res.status(404).send('프로젝트를 찾을 수 없습니다.')
         }
 
         res.send('Success!')
