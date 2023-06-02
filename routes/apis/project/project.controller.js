@@ -22,7 +22,7 @@ exports.GetItem = async (req, res) => {
         if (!projectData) {
             return res.status(404).send('데이터를 찾을 수 없습니다.')
         }
-        
+
         const ownerData = await UserDB.GetItem({ _id: projectData.owner })
         const result = { ...projectData, owner: ownerData.name, ownerId: projectData.owner }
         res.send({ data: result })
@@ -226,6 +226,8 @@ exports.DeleteProject = async (req, res) => {
         if (result.deletedCount === 0) {
             return res.status(404).send('프로젝트를 찾을 수 없습니다.')
         }
+
+        await UserDB.UpdateProjectId({ _id: userId, projectId: '' })
 
         res.send('Success!')
     } catch (error) {
