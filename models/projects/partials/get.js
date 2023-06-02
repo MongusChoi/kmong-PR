@@ -14,5 +14,10 @@ module.exports = {
         if (owner) filter.owner = owner
 
         return projectsColl.findOne(filter)
+    },
+    GetApplicationData: (param = {}) => {
+        const { id, owner } = param
+
+        return projectsColl.findOne({ _id: new ObjectId(id), owner }, { projection: { application: true } })
     }
 }

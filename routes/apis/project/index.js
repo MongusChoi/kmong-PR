@@ -9,9 +9,12 @@ router.use('*', passport.authenticate('jwt'))
 
 router.post('/', controller.Create)
 router.patch('/:id', controller.UpdateItem)
+
+router.get('/:id/application', controller.GetApplicationData)
 router.put('/:id/application', controller.CreateApplication)
 router.patch('/:id/application/apply', controller.ApplyApplication)
 router.delete('/:id/application', controller.DeleteApplication)
+
 router.delete('/:id', controller.DeleteProject)
 
 module.exports = router

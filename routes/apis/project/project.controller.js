@@ -96,6 +96,18 @@ exports.UpdateItem = async (req, res) => {
     }
 }
 
+exports.GetApplicationData = async (req, res) => {
+    const { _id: userId } = req.user
+    const { id: projectId } = req.params
+
+    if (!projectId || projectId.length !== 24) {
+        return res.status(400).send('파라미터가 잘못되었습니다.')
+    }
+
+    const result = await ProjectDB.GetApplicationData({ id: projectId, owner: userId })
+    res.send({ application: result.application })
+}
+
 exports.CreateApplication = async (req, res) => {
     try {
         const { _id: userId } = req.user
